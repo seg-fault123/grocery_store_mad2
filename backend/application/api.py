@@ -19,4 +19,6 @@ def user_lookup_callback(_jwt_header, jwt_data):
         user=Customer.query.get(identity['id'])
     elif identity['role_name']=='admin':
         user=Admin.query.get(identity['id'])
+    elif identity['role_name']=='store_manager':
+        user=Store_Manager.query.get(identity['id'])
     return user

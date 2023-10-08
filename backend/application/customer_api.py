@@ -21,11 +21,11 @@ class CustomerApi(Resource):
             return response
 
 
-class Signup(Resource):
+class Customer_Signup(Resource):
     def post(self):
         pass
 
-class Login(Resource):
+class Customer_Login(Resource):
     def post(self):
         user_name=request.json.get('user_name')
         password=request.json.get('password')
@@ -56,4 +56,4 @@ def validate_requester(requested_id, requester_jwt):
 
 
 api.add_resource(CustomerApi, '/api/customer/<int:id>')
-api.add_resource(Login, '/api/customer_login')
+api.add_resource(Customer_Login, '/api/customer_login')
