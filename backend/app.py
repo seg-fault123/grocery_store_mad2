@@ -15,6 +15,7 @@ app.app_context().push()
 with app.app_context():
     from application.customer_api import *
     from application.admin_api import *
+    from application.store_manager_api import *
 
 if __name__=='__main__':
     # print('sqlite:///{0}'.format(os.path.join(os.getcwd(), 'store.db')))

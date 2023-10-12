@@ -5,7 +5,6 @@ from flask_jwt_extended import JWTManager
 
 api=Api(app)
 jwt=JWTManager(app)
-
 @jwt.user_identity_loader
 def user_identity_lookup(user):
     response={'id': user.id, 'role_name': user.role.name}
