@@ -51,6 +51,7 @@ class Customer_Api(Resource):
         customer=Customer(first_name=first_name, last_name=last_name, email_id=email,
                           user_name=user_name, password=hash_password.hash(password), last_active=datetime.date.today(),
                           role_id=role.id)
+        db.session.add(customer)
         db.session.commit()
         customer=Customer.query.filter_by(user_name=user_name).first()
         customer.access_token=create_access_token(identity=customer)
@@ -71,7 +72,7 @@ class Customer_Login(Resource):
             response['msg']='Successful'
             return response, 200
         else:
-            return {'msg': 'Invalid Customer Credentials'}, 401
+            return {'msg': 'Invalid Customer Credentials!'}, 401
 class Customer_Product(Resource):
     @jwt_required()
     def get(self, c_id, p_id):

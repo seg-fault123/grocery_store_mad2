@@ -9,6 +9,11 @@ class Admin(db.Model):
     password=db.Column(db.String, nullable=False)
     access_token=db.Column(db.String, nullable=False, unique=True)
     role_id=db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
+    def make_json(self):
+        response=dict(id=self.id, email_id=self.email_id,user_name=self.user_name,
+                      access_token=self.access_token, role_id=self.role_id, role_name=self.role.name)
+        return response
+
 
 class Cart_Product(db.Model):
     customer_id=db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
@@ -20,6 +25,11 @@ class Category(db.Model):
     name=db.Column(db.String, nullable=False, unique=True)
     description=db.Column(db.String, nullable=False)
     products=db.relationship('Product', backref='category')
+    def make_json(self):
+        response=dict(id=self.id, name=self.name, description=self.description)
+        products=[{'id': product.id, 'name': product.name} for product in self.products]
+        response['products']=products
+        return response
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -88,6 +98,8 @@ class Product(db.Model):
     units_sold=db.Column(db.Integer, nullable=False, default=0)
     category_id=db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     sm_id=db.Column(db.Integer, db.ForeignKey('store_manager.id'), nullable=False)
+    mfg_date=db.Column(db.Date)
+    exp_date=db.Column(db.Date)
     store_manager=db.relationship('Store_Manager', backref='products')
     def make_json(self):
         response=dict(id=self.id, name=self.name, description=self.description,

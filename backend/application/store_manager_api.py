@@ -55,6 +55,56 @@ class Store_Manager_Product(Resource):
         response['msg'] = 'Successful'
         return response, 200
 
+    @jwt_required()
+    def post(self, sm_id):
+        response, status, store_manager=validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        data=request.json
+        name=data.get('name')
+        description=data.get('description')
+        price=data.get('price')
+        unit_measure=data.get('unit_measure')
+        stock=data.get('stock')
+        category_id=data.get('category_id')
+        mfg_date=data.get('mfg_date')
+        exp_date=data.get('exp_date')
+        data_sm_id=data.get('sm_id')
+        if (name is None) or (name==''):
+            return {'msg': 'Name cannot be empty!'}, 406
+        if (description is None) or (description==''):
+            return {'msg': 'Description cannot be empty!'}, 406
+        if (price is None) or (price==''):
+            return {'msg': 'Price cannot be Empty'}, 406
+        if price<=0:
+            return {'msg': 'Price cannot be less than or equal to 0!'}, 406
+        if (unit_measure is None) or (unit_measure==''):
+            return {'msg': 'Unit Measure cannot be empty!'}, 406
+        if (stock is None) or (stock==''):
+            return {'msg': "Stock cannot be empty!"}, 406
+        if stock<0:
+            return {'msg': 'Stock cannot be negative!'}, 406
+        if (category_id is None) or (category_id==''):
+            return {'msg': 'Category cannot be empty!'}, 406
+        if Category.query.get(category_id) is None:
+            return {'msg': 'Invalid Category ID!'}, 406
+        if (data_sm_id is None) or (data_sm_id=='') or data_sm_id!=sm_id:
+            return {'msg': 'Store Manager ID not valid!'}, 406
+        if (mfg_date is not None) and (mfg_date!=''):
+            try:
+                mfg_date=to_date(mfg_date)
+                exp_date=to_date(exp_date)
+            except:
+                return {'msg': 'Date not in correct format! Format should be "yyyy-mm-dd"'}, 406
+        else:
+            exp_date=None
+        product=Product(name=name, description=description, price=price, unit_measure=unit_measure,
+                        stock=stock, category_id=category_id, mfg_date=mfg_date, exp_date=exp_date,
+                        sm_id=sm_id)
+        db.session.add(product)
+        db.session.commit()
+        return {'msg': 'Product Created Successfully!'}, 200
+
 def validate_store_manager(requested_id, requester_jwt):
     identity = requester_jwt['sub']
     if identity['role_name'] != 'store_manager':
@@ -68,6 +118,13 @@ def validate_store_manager(requested_id, requester_jwt):
     if sm_token_data['jti']!=requester_jwt['jti']:
         return {'msg': 'Unauthorized Access'}, 401, None
     return {}, 200, store_manager
+
+def to_date(date_str):
+    if date_str=='':
+        return None
+    date_list=date_str.split('-')
+    date_=datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+    return date_
 
 api.add_resource(Store_Manager_Api, '/api/store_manager')
 api.add_resource(Store_Manager_Product, '/api/store_manager/<int:sm_id>/product/<int:p_id>')
