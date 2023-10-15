@@ -13,16 +13,9 @@ class Customer_Api(Resource):
         response, status, customer=validate_customer(id, get_jwt())
         if customer is None:
             return response, status
-        else:
-            response['msg']='User Found'
-            response['id']=customer.id
-            response['first_name']=customer.first_name
-            response['last_name']=customer.last_name
-            response['email_id']=customer.email_id
-            response['user_name']=customer.user_name
-            response['role_id']=customer.role.id
-            response['role_name']=customer.role.name
-            return response
+        response=customer.make_json()
+        response['msg']="Successful"
+        return response, 200
 
     def post(self):
         data=request.json
@@ -58,6 +51,24 @@ class Customer_Api(Resource):
         db.session.commit()
         return {'msg': 'Account Created Successfully! You can now Login.'}, 200
 
+
+
+class Customer_Category(Resource):
+    @jwt_required()
+    def get(self, c_id, cat_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        category=Category.query.get(cat_id)
+        if category is None:
+            response['msg']='Category Not Found!'
+            return response, 404
+        response=category.make_json()
+        response['msg']="Successful"
+        return response, 200
+
+
+
 class Customer_Login(Resource):
     def post(self):
         user_name=request.json.get('user_name')
@@ -73,6 +84,8 @@ class Customer_Login(Resource):
             return response, 200
         else:
             return {'msg': 'Invalid Customer Credentials!'}, 401
+
+
 class Customer_Product(Resource):
     @jwt_required()
     def get(self, c_id, p_id):
@@ -86,6 +99,7 @@ class Customer_Product(Resource):
         response=product.make_json()
         response['msg']='Successful'
         return response, 200
+
 
 def validate_customer(requested_id, requester_jwt):
     identity=requester_jwt['sub']
@@ -105,5 +119,6 @@ def validate_customer(requested_id, requester_jwt):
 
 
 api.add_resource(Customer_Api, '/api/customer/<int:id>', '/api/customer')
+api.add_resource(Customer_Category, '/api/customer/<int:c_id>/category/<int:cat_id>')
 api.add_resource(Customer_Login, '/api/customer_login')
 api.add_resource(Customer_Product, '/api/customer/<int:c_id>/product/<int:p_id>')

@@ -1,6 +1,7 @@
 from flask import Flask
 import os
 from application.database import db
+from flask_cors import CORS
 
 
 app=Flask(__name__)
@@ -10,6 +11,7 @@ app.config['JWT_SECRET_KEY']='EvI1xOU73MuhiGNd4Qr-ZA'
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=False
 
 db.init_app(app)
+cors=CORS(app, origins='http://localhost:8080')
 app.app_context().push()
 
 with app.app_context():
