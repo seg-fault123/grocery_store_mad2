@@ -59,6 +59,25 @@ class Store_Manager_Category(Resource):
 
 
 
+class Store_Manager_Login(Resource):
+    def post(self):
+        user_name = request.json.get('user_name')
+        password = request.json.get('password')
+        if (user_name is None) or (user_name == ''):
+            return {'msg': 'UserName cannot be empty!'}, 406
+        if (password is None) or (password == ''):
+            return {'msg': 'Password cannot be empty!'}, 406
+        store_manager=Store_Manager.query.filter_by(user_name=user_name).first()
+        if store_manager and store_manager.approved and hash_password.verify(password, store_manager.password):
+            response=store_manager.make_json()
+            response['msg']="Successful"
+            return response, 200
+        else:
+            return {"msg": "Invalid Store Manager Credentials!"}, 401
+
+
+
+
 class Store_Manager_Product(Resource):
     @jwt_required()
     def get(self, sm_id, p_id):
@@ -170,5 +189,6 @@ def to_date(date_str):
 
 api.add_resource(Store_Manager_Api, '/api/store_manager')
 api.add_resource(Store_Manager_Category, '/api/store_manager/<int:sm_id>/category/<int:cat_id>')
+api.add_resource(Store_Manager_Login, '/api/store_manager_login')
 api.add_resource(Store_Manager_Product, '/api/store_manager/<int:sm_id>/product/<int:p_id>',
                  '/api/store_manager/<int:sm_id>/product')

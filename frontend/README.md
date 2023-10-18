@@ -30,16 +30,19 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * customer login 
     * get category 
     * get product
+    * customer home
 * ### Admin
     * admin login
     * get category
     * post category
 * ### Store Manager
+    * store manager login
     * store manager
     * get product
     * post product
     * get category
-
+    
 ## Frontend Implemented
 * ### Customer
     * customer login
+    * customer home

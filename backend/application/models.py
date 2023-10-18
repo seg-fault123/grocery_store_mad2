@@ -102,10 +102,16 @@ class Product(db.Model):
     exp_date=db.Column(db.Date)
     store_manager=db.relationship('Store_Manager', backref='products')
     def make_json(self):
+        mfg_date=None
+        exp_date=None
+        if self.mfg_date is not None:
+            mfg_date=self.mfg_date.__str__()
+            exp_date=self.exp_date.__str__()
         response=dict(id=self.id, name=self.name, description=self.description,
                       price=self.price, unit_measure=self.unit_measure, stock=self.stock,
                       units_sold=self.units_sold, category_id=self.category_id,
-                      category_name=self.category.name, sm_id=self.sm_id)
+                      category_name=self.category.name, sm_id=self.sm_id, mfg_date=mfg_date,
+                      exp_date=exp_date)
         return response
 
 class Role(db.Model):
@@ -128,3 +134,9 @@ class Store_Manager(db.Model):
     access_token = db.Column(db.String, unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     approved=db.Column(db.Integer, nullable=False, default=0)
+
+    def make_json(self):
+        response = dict(id=self.id, first_name=self.first_name, last_name=self.last_name,
+                        email_id=self.email_id, user_name=self.user_name, access_token=self.access_token,
+                        role_id=self.role_id, role_name=self.role.name)
+        return response

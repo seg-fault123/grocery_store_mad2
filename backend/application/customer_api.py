@@ -68,6 +68,16 @@ class Customer_Category(Resource):
         return response, 200
 
 
+class Customer_Home(Resource):
+    @jwt_required()
+    def get(self, c_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        categories=Category.query.all()
+        response['msg']="Successful"
+        response['categories']=[category.id for category in categories]
+        return response, 200
 
 class Customer_Login(Resource):
     def post(self):
@@ -120,5 +130,6 @@ def validate_customer(requested_id, requester_jwt):
 
 api.add_resource(Customer_Api, '/api/customer/<int:id>', '/api/customer')
 api.add_resource(Customer_Category, '/api/customer/<int:c_id>/category/<int:cat_id>')
+api.add_resource(Customer_Home, '/api/customer/<int:c_id>/home')
 api.add_resource(Customer_Login, '/api/customer_login')
 api.add_resource(Customer_Product, '/api/customer/<int:c_id>/product/<int:p_id>')

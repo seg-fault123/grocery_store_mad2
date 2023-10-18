@@ -1,6 +1,7 @@
 <template>
     <div class="container">
         <h2 style="padding: 10px">Welcome to the Customer Login Page</h2>
+        <br>
         <div v-if="show_error" class="alert alert-danger" role="alert">
             {{ msg }}
         </div>
@@ -20,7 +21,31 @@
                     class="btn btn-outline-primary">Login</button>
             </div>
         </form>
+        <div class="container" id="links" style="margin-top: 60px;">
+            <div class="row">
+                <div class="col">
+                    <div class="badge bg-dark">
+                        <h5>New Customer?</h5>
+                        <p><RouterLink to="/customer_signup">Click Here to Register</RouterLink></p>
+                    </div>   
+                </div>
+                <div class="col">
+                    <div class="badge bg-dark">
+                        <h5>Are you an Admin?</h5>
+                        <p><RouterLink to="/admin_login">Click Here to Login</RouterLink></p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="badge bg-dark">
+                        <h5>Are you a Store Manager?</h5>
+                        <p><RouterLink to="/store_manager_login">Click Here to Login</RouterLink></p>
+                        <p><RouterLink to="/store_manager_signup">Click Here to Register</RouterLink></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+    
 </template>
 
 <script>
@@ -70,7 +95,7 @@
                 }
                 this.show_error=false
                 this.$store.commit('set_data', data)
-                
+                this.$router.push('/customer_home')
 
             },
             handle_error(){
@@ -81,4 +106,3 @@
     }
 
 </script>
-
