@@ -25,6 +25,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 ## API's Implemented
 * ### Customer
+    * buy now
     * get customer 
     * post customer 
     * customer login 
@@ -44,5 +45,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     
 ## Frontend Implemented
 * ### Customer
+    * buy now
     * customer login
+    * customer logout
     * customer home

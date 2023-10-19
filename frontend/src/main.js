@@ -29,6 +29,16 @@ const store = createStore({
             {return}
             state.first_name=payload.first_name
             state.last_name=payload.last_name
+        },
+        reset_data(state){
+            state.id = null,
+            state.first_name = null,
+            state.last_name = null,
+            state.email_id = null,
+            state.user_name = null,
+            state.access_token = null,
+            state.role_id = null,
+            state.role_name = null
         }
     },
     plugins: [createPersistedSate()]

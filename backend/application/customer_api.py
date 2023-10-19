@@ -7,6 +7,43 @@ from .api import *
 from flask_jwt_extended import create_access_token, current_user, jwt_required, get_jwt, decode_token
 
 
+
+class Buy_Now(Resource):
+    @jwt_required()
+    def post(self, c_id, p_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        product=Product.query.get(p_id)
+        if product is None:
+            response['msg']='Product Not Found!'
+            return response, 404
+        quantity=request.json.get('quantity')
+        max_available=min(product.stock, 10)
+        try:
+            quantity=int(quantity)
+        except:
+            response['msg']='Quantity should be Integer!'
+            return response, 406
+        if quantity<1:
+            response['msg']='Quantity has to be at least 1!'
+            return response, 406
+        if quantity > max_available:
+            response['msg']=f'Quantity cannot be more than {max_available}!'
+            return response, 406
+        product.stock-=quantity
+        db.session.add(Order(customer_id=c_id, date=datetime.date.today()))
+        db.session.commit()
+        order=Order.query.all()[-1]
+        db.session.add(Order_Product(order_id=order.id, product_id=product.id, quantity=quantity))
+        db.session.commit()
+        response['msg']='Successfully Placed'
+        response['order_id']=order.id
+        return response, 200
+
+
+
+
 class Customer_Api(Resource):
     @jwt_required()
     def get(self, id):
@@ -89,6 +126,8 @@ class Customer_Login(Resource):
             return {'msg': 'Password cannot be empty!'}, 406
         customer=Customer.query.filter(Customer.user_name==user_name).first()
         if customer and hash_password.verify(password, customer.password):
+            customer.last_active=datetime.date.today()
+            db.session.commit()
             response=customer.make_json()
             response['msg']='Successful'
             return response, 200
@@ -128,6 +167,7 @@ def validate_customer(requested_id, requester_jwt):
 
 
 
+api.add_resource(Buy_Now, '/api/customer/<int:c_id>/buy_now/<int:p_id>')
 api.add_resource(Customer_Api, '/api/customer/<int:id>', '/api/customer')
 api.add_resource(Customer_Category, '/api/customer/<int:c_id>/category/<int:cat_id>')
 api.add_resource(Customer_Home, '/api/customer/<int:c_id>/home')

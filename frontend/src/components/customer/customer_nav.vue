@@ -7,7 +7,7 @@
             <RouterLink class="nav-link" to="/customer_serach">Search</RouterLink>
             <RouterLink class="nav-link" to="/customer_cart">Cart</RouterLink>
             <RouterLink class="nav-link" to="/customer_orders">Previous Orders</RouterLink>
-            <RouterLink class="nav-link" to="/customer_logout">Logout</RouterLink>
+            <button class="nav-link" @click="$emit('logout')">Logout</button>
         </div>
     </nav>
 

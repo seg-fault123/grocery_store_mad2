@@ -63,7 +63,6 @@
             this.stock=data['stock']
             this.mfg_date=data['mfg_date']
             this.exp_date=data['exp_date']
-            console.log(this.instock)
         }
     }
 </script>

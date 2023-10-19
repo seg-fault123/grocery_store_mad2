@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import Customer_Buy_Now from "../components/customer/customer_buy_now"
 import Customer_Home from "../components/customer/customer_home"
 import Customer_Login from "../components/customer/customer_login"
 import Page_Not_Found from "../components/page_not_found"
@@ -9,6 +10,11 @@ const routes=[
         redirect: {
             path: "/customer_login"
         }
+    },
+    {
+        path: "/customer/buy_now/:p_id(\\d+)",
+        component: Customer_Buy_Now,
+        props: true
     },
     {
         path: "/customer_home",

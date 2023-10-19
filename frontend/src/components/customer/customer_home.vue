@@ -1,11 +1,13 @@
 <template>
     <div class="container">
         <Un_Authorized v-if="unauthorized" />
-        <Customer_Nav></Customer_Nav>
-        <h1 style="margin-top: 20px;">Welcome {{ $store.state.first_name }}</h1>
-        <div class="container" id="all_categories">
-            <div v-for="category in categories" :key="category">
-                <Customer_Category :cat_id="category"></Customer_Category>
+        <div v-else>
+            <Customer_Nav @logout="logout()"></Customer_Nav>
+            <h1 style="margin-top: 20px;">Welcome {{ $store.state.first_name }}</h1>
+            <div class="container" id="all_categories">
+                <div v-for="category in categories" :key="category">
+                    <Customer_Category :cat_id="category"></Customer_Category>
+                </div>
             </div>
         </div>
     </div>
@@ -29,6 +31,12 @@
                 unauthorized: false
             }
         },
+        methods: {
+            logout(){
+                this.$store.commit('reset_data')
+                this.$router.push('/customer_login')
+            }
+        },  
         async mounted(){
             let c_id=this.$store.state.id
             let access_token=this.$store.state.access_token
@@ -45,6 +53,11 @@
                     "Authorization": `Bearer ${access_token}`
                 }
             })
+            if (resp.status===401)
+            {
+                this.unauthorized=true
+                return
+            }
             let data=await resp.json()
             this.categories=data['categories']
         }
