@@ -80,12 +80,20 @@ class Order(db.Model):
     date=db.Column(db.Date, nullable=False)
     customer_id=db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
     customer=db.relationship('Customer', backref='orders')
+    def make_json(self):
+        products=[(order_product.product, order_product.quantity) for order_product in self.order_products]
+        products=[dict(id=product.id, name=product.name, price=product.price, quantity=quantity) for product, quantity in products]
+        date=self.date.__str__()
+        response=dict(id=self.id, date=date, products=products)
+        return response
 
 class Order_Product(db.Model):
     __tablename__='order_product'
     order_id=db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     product_id=db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     quantity=db.Column(db.Integer, nullable=False)
+    product=db.relationship('Product')
+    order=db.relationship('Order', backref='order_products')
 
 class Product(db.Model):
     __tablename__='product'

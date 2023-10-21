@@ -32,6 +32,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * get category 
     * get product
     * customer home
+    * customer orders
+    * order summary
 * ### Admin
     * admin login
     * get category
@@ -49,3 +51,5 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * customer login
     * customer logout
     * customer home
+    * customer orders
+    * order summary

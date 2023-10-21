@@ -97,7 +97,7 @@
                     this.show_error=true
                     return
                 }
-                //make reroute to orders
+                this.$router.push(`/customer/order_summary/${data['order_id']}`)
             },
             logout(){
                 this.$store.commit('reset_data')

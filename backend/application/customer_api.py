@@ -32,6 +32,7 @@ class Buy_Now(Resource):
             response['msg']=f'Quantity cannot be more than {max_available}!'
             return response, 406
         product.stock-=quantity
+        product.units_sold+=quantity
         db.session.add(Order(customer_id=c_id, date=datetime.date.today()))
         db.session.commit()
         order=Order.query.all()[-1]
@@ -150,6 +151,36 @@ class Customer_Product(Resource):
         return response, 200
 
 
+
+class Customer_Orders(Resource):
+    @jwt_required()
+    def get(self, c_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        orders=[dict(id=order.id, date=order.date.__str__()) for order in customer.orders[::-1]]
+        response['msg']='Successful'
+        response['orders']=orders
+        return response, 200
+
+
+
+class Order_Summary(Resource):
+    @jwt_required()
+    def get(self, c_id, o_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        order=Order.query.get(o_id)
+        if (order is None) or (order.id!=o_id) or (order.customer_id!=c_id):
+            response['msg']='Order not Found'
+            return response, 404
+        response=order.make_json()
+        response['msg'] = "Successful"
+        return response, 200
+
+
+
 def validate_customer(requested_id, requester_jwt):
     identity=requester_jwt['sub']
     if identity['role_name']!='customer':
@@ -173,3 +204,5 @@ api.add_resource(Customer_Category, '/api/customer/<int:c_id>/category/<int:cat_
 api.add_resource(Customer_Home, '/api/customer/<int:c_id>/home')
 api.add_resource(Customer_Login, '/api/customer_login')
 api.add_resource(Customer_Product, '/api/customer/<int:c_id>/product/<int:p_id>')
+api.add_resource(Customer_Orders, '/api/customer/<int:c_id>/orders')
+api.add_resource(Order_Summary, '/api/customer/<int:c_id>/order_summary/<int:o_id>')

@@ -2,7 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import Customer_Buy_Now from "../components/customer/customer_buy_now"
 import Customer_Home from "../components/customer/customer_home"
 import Customer_Login from "../components/customer/customer_login"
+import Customer_Orders from "../components/customer/customer_orders"
 import Page_Not_Found from "../components/page_not_found"
+import Order_Summary from "../components/customer/order_summary"
 
 const routes=[
     {
@@ -25,6 +27,16 @@ const routes=[
         path: "/customer_login",
         name: "customer_login",
         component: Customer_Login
+    },
+    {
+        path: "/customer_orders",
+        name: "previous_orders",
+        component: Customer_Orders
+    },
+    {
+        path: "/customer/order_summary/:o_id(\\d+)",
+        component: Order_Summary,
+        props: true
     },
     {
         path: "/:pathMatch(.*)*",
