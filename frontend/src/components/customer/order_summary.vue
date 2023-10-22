@@ -85,7 +85,7 @@
                 this.unauthorized=true
                 return
             }
-            let url=`http://127.0.0.1:5000/api/customer/${c_id}/order_summary/${this.o_id}`
+            let url=`http://127.0.0.1:5000/api/customer/${c_id}/order/${this.o_id}`
             let resp=await fetch(url, {
                 method: "GET",
                 headers: {

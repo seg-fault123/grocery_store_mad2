@@ -28,7 +28,11 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * buy now
     * get customer 
     * post customer 
-    * customer login 
+    * customer login
+    * get cart
+    * add to cart
+    * edit cart
+    * delete product from cart 
     * get category 
     * get product
     * customer home
@@ -48,6 +52,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ## Frontend Implemented
 * ### Customer
     * buy now
+    * add to cart
     * customer login
     * customer logout
     * customer home

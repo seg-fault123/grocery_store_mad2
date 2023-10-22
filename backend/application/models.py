@@ -16,9 +16,12 @@ class Admin(db.Model):
 
 
 class Cart_Product(db.Model):
+    __tablename__='cart_product'
     customer_id=db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     product_id=db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     quantity=db.Column(db.Integer, nullable=False)
+    customer=db.relationship('Customer', backref='cart')
+    product=db.relationship('Product')
 class Category(db.Model):
     __tablename__='category'
     id=db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -27,7 +30,7 @@ class Category(db.Model):
     products=db.relationship('Product', backref='category')
     def make_json(self):
         response=dict(id=self.id, name=self.name, description=self.description)
-        products=[{'id': product.id, 'name': product.name} for product in self.products]
+        products=[{'id': product.id, 'name': product.name} for product in self.products[::-1]]
         response['products']=products
         return response
 

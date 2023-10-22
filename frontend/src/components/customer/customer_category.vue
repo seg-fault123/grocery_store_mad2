@@ -1,10 +1,12 @@
 <template>
-    <div class="m-4 p-4 bg-dark text-white rounded" :id="cat_id">
-        <h4>{{ name }}</h4>
-        <p>{{ description }}</p>
-        <hr class="my-4">
-        <div v-for="product in products" :key="product.id">
-            <Customer_Product :p_id="product.id"></Customer_Product>
+    <div v-if="not_empty">
+        <div class="m-4 p-4 bg-dark text-white rounded" :id="cat_id">
+            <h4>{{ name }}</h4>
+            <p>{{ description }}</p>
+            <hr class="my-4">
+            <div v-for="product in products" :key="product.id">
+                <Customer_Product :p_id="product.id"></Customer_Product>
+            </div>
         </div>
     </div>
 
@@ -26,6 +28,13 @@
                 name: "",
                 description: "",
                 products: []
+            }
+        },
+        computed: {
+            not_empty(){
+                if (this.products.length>0)
+                {return true}
+                return false
             }
         },
         async mounted(){
