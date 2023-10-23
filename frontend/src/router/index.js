@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Customer_Add_to_Cart from "../components/customer/customer_add_to_cart"
 import Customer_Buy_Now from "../components/customer/customer_buy_now"
+import Customer_Cart from "../components/customer/customer_cart"
+import Customer_Edit_Cart from "../components/customer/customer_edit_cart"
 import Customer_Home from "../components/customer/customer_home"
 import Customer_Login from "../components/customer/customer_login"
 import Customer_Orders from "../components/customer/customer_orders"
@@ -22,6 +24,15 @@ const routes=[
     {
         path: "/customer/buy_now/:p_id(\\d+)",
         component: Customer_Buy_Now,
+        props: true
+    },
+    {
+        path: "/customer_cart",
+        component: Customer_Cart
+    },
+    {
+        path: "/customer/edit_cart/:p_id(\\d+)",
+        component: Customer_Edit_Cart,
         props: true
     },
     {

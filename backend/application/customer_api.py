@@ -101,7 +101,7 @@ class Customer_Cart(Resource):
         cart=[dict(id=product.id, name=product.name, price=product.price, quantity=quantity) for product, quantity in cart]
         response['msg']='Successful'
         response['cart']=cart
-        return response, status
+        return response, 200
 
     @jwt_required()
     def post(self, c_id, p_id):
@@ -162,7 +162,7 @@ class Customer_Cart(Resource):
             return response, 404
         cart_product.quantity=quantity
         db.session.commit()
-        response['msg']="Successful"
+        response['msg']="Successfully Updated"
         return response, 200
 
     @jwt_required()
@@ -178,6 +178,23 @@ class Customer_Cart(Resource):
         db.session.commit()
         response['msg']='Successfully Deleted'
         return response, 200
+
+
+class Customer_Cart_Product(Resource):
+    @jwt_required()
+    def get(self, c_id, p_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        cart_product = Cart_Product.query.filter_by(customer_id=c_id, product_id=p_id).first()
+        if cart_product is None:
+            response['msg'] = 'Product not found in Cart'
+            return response, 404
+        response=cart_product.product.make_json()
+        response['quantity']=cart_product.quantity
+        response['msg']='Successful'
+        return response, 200
+
 
 
 class Customer_Category(Resource):
@@ -268,7 +285,28 @@ class Customer_Order(Resource):
         response['msg'] = "Successful"
         return response, 200
 
-
+    @jwt_required()
+    def post(self, c_id):
+        response, status, customer=validate_customer(c_id, get_jwt())
+        if customer is None:
+            return response, status
+        response, status, order=validate_order(customer)
+        if order is None:
+            return response, status
+        cart=customer.cart
+        for cart_product in cart:
+            cart_product.product.stock-=cart_product.quantity
+            cart_product.product.units_sold+=cart_product.quantity
+            db.session.delete(cart_product)
+        db.session.add(order)
+        db.session.commit()
+        order=Order.query.all()[-1]
+        for cart_product in cart:
+            db.session.add(Order_Product(order_id=order.id, product_id=cart_product.product_id, quantity=cart_product.quantity))
+        db.session.commit()
+        response['msg'] = 'Successfully Placed'
+        response['order_id'] = order.id
+        return response, 200
 
 def validate_customer(requested_id, requester_jwt):
     identity=requester_jwt['sub']
@@ -284,15 +322,27 @@ def validate_customer(requested_id, requester_jwt):
         return {'msg': 'Unauthorized Access'}, 401, None
     return {}, 200, customer
 
-
+def validate_order(customer):
+    cart=customer.cart
+    if len(cart)==0:
+        return {'msg': "Cart is Empty, cannot place Order!"}, 406, None
+    for cart_product in cart:
+        product=cart_product.product
+        if product.stock==0:
+            return {'msg': f"{product.name} is Out of Stock now! Please remove from cart to proceed!"}, 406, None
+        if product.stock<cart_product.quantity:
+            return {'msg' : f"{product.name}'s quantity cannot be more than {product.stock}! Please reduce the quantity to proceed"}, 406, None
+    order=Order(customer_id=customer.id, date=datetime.date.today())
+    return {}, 200, order
 
 
 api.add_resource(Buy_Now, '/api/customer/<int:c_id>/buy_now/<int:p_id>')
 api.add_resource(Customer_Api, '/api/customer/<int:id>', '/api/customer')
 api.add_resource(Customer_Cart, '/api/customer/<int:c_id>/cart', '/api/customer/<int:c_id>/cart/<int:p_id>')
+api.add_resource(Customer_Cart_Product, '/api/customer/<int:c_id>/cart_product/<int:p_id>')
 api.add_resource(Customer_Category, '/api/customer/<int:c_id>/category/<int:cat_id>')
 api.add_resource(Customer_Home, '/api/customer/<int:c_id>/home')
 api.add_resource(Customer_Login, '/api/customer_login')
 api.add_resource(Customer_Product, '/api/customer/<int:c_id>/product/<int:p_id>')
 api.add_resource(Customer_Orders, '/api/customer/<int:c_id>/orders')
-api.add_resource(Customer_Order, '/api/customer/<int:c_id>/order/<int:o_id>')
+api.add_resource(Customer_Order, '/api/customer/<int:c_id>/order', '/api/customer/<int:c_id>/order/<int:o_id>')

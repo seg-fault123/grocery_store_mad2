@@ -30,6 +30,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * post customer 
     * customer login
     * get cart
+    * get cart product
     * add to cart
     * edit cart
     * delete product from cart 
@@ -38,6 +39,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * customer home
     * customer orders
     * order summary
+    * new order
 * ### Admin
     * admin login
     * get category
@@ -52,7 +54,11 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 ## Frontend Implemented
 * ### Customer
     * buy now
+    * view cart
     * add to cart
+    * edit cart
+    * buy all
+    * delete product from cart
     * customer login
     * customer logout
     * customer home
