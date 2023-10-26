@@ -6,6 +6,7 @@
             <p class="card-text"><b>Rate : </b>{{ price }} {{ unit_measure }}</p>
             <p class="card-text" v-if="mfg_date"><b>Mfg Date : </b>{{ mfg_date }}</p>
             <p class="card-text" v-if="exp_date"><b>Exp Date : </b>{{ exp_date }}</p>
+            <p class="card-text"><b>Category : </b>{{ category }}</p>
             <div v-if="instock">
                 <button class="btn btn-outline-primary" id="buy_now"
                     @click="$router.push(`/customer/buy_now/${p_id}`)">Buy Now</button>
@@ -34,6 +35,7 @@
                 stock: 0,
                 mfg_date: null,
                 exp_date: null,
+                category: ""
             }
         },
         computed: {
@@ -63,6 +65,7 @@
             this.stock=data['stock']
             this.mfg_date=data['mfg_date']
             this.exp_date=data['exp_date']
+            this.category=data['category_name']
         }
     }
 </script>
@@ -71,5 +74,11 @@
  #buy_now{
     margin-right: 10px;
  }
+
+ .card{
+    border-color: black;
+    border-width: 5px;
+    margin-bottom: 10px;
+}  
  
 </style>

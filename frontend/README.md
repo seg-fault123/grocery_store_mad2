@@ -40,6 +40,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * customer orders
     * order summary
     * new order
+    * search
 * ### Admin
     * admin login
     * get category
@@ -61,6 +62,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * delete product from cart
     * customer login
     * customer logout
+    * customer signup
     * customer home
     * customer orders
+    * search
     * order summary

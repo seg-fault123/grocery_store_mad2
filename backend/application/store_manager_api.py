@@ -1,7 +1,5 @@
-import datetime
 from flask import request
 from flask_restful import Resource
-from .models import *
 from passlib.hash import pbkdf2_sha256 as hash_password
 from .api import *
 from flask_jwt_extended import create_access_token, current_user, jwt_required, get_jwt, decode_token
@@ -180,12 +178,6 @@ def validate_product_add(sm_id, data):
                       sm_id=sm_id)
     return {}, 200, product
 
-def to_date(date_str):
-    if date_str=='':
-        return None
-    date_list=date_str.split('-')
-    date_=datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
-    return date_
 
 api.add_resource(Store_Manager_Api, '/api/store_manager')
 api.add_resource(Store_Manager_Category, '/api/store_manager/<int:sm_id>/category/<int:cat_id>')

@@ -6,8 +6,11 @@ import Customer_Edit_Cart from "../components/customer/customer_edit_cart"
 import Customer_Home from "../components/customer/customer_home"
 import Customer_Login from "../components/customer/customer_login"
 import Customer_Orders from "../components/customer/customer_orders"
+import Customer_Search from "../components/customer/customer_search"
+import Customer_Signup from "../components/customer/customer_signup"
 import Page_Not_Found from "../components/page_not_found"
 import Order_Summary from "../components/customer/order_summary"
+
 
 const routes=[
     {
@@ -54,6 +57,14 @@ const routes=[
         path: "/customer/order_summary/:o_id(\\d+)",
         component: Order_Summary,
         props: true
+    },
+    {
+        path: "/customer_search",
+        component: Customer_Search
+    },
+    {
+        path: "/customer_signup",
+        component: Customer_Signup
     },
     {
         path: "/:pathMatch(.*)*",

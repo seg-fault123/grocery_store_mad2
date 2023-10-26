@@ -1,3 +1,4 @@
+import datetime
 from flask import current_app as app
 from flask_restful import Api
 from .models import *
@@ -21,3 +22,10 @@ def user_lookup_callback(_jwt_header, jwt_data):
     elif identity['role_name']=='store_manager':
         user=Store_Manager.query.get(identity['id'])
     return user
+
+def to_date(date_str):
+    if date_str=='':
+        return None
+    date_list=date_str.split('-')
+    date_=datetime.date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
+    return date_
