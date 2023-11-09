@@ -82,7 +82,7 @@
             <div v-if="no_results" class="alert alert-secondary" role="alert">
                 Nothing matches! Try searching something different.
             </div>
-            <div v-else-if="show_products" class="m-4 p-4 bg-dark">
+            <div v-else-if="show_products" class="m-4 p-4 bg-dark rounded">
                 <div v-for="product in products" :key="product">
                     <Customer_Product :p_id="product"></Customer_Product>
                 </div>

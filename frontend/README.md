@@ -47,10 +47,17 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * post category
 * ### Store Manager
     * store manager login
-    * store manager
+    * new store manager
     * get product
     * post product
+    * edit product
+    * delete product
+    * get products
     * get category
+    * post category request
+    * edit category request
+    * delete category request
+    * get categories
     
 ## Frontend Implemented
 * ### Customer
@@ -67,3 +74,16 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * customer orders
     * search
     * order summary
+
+* ### Store Manager
+    * add category request
+    * get categories
+    * get category
+    * edit category request
+    * delete category request
+    * add product
+    * edit product
+    * get product
+    * get products
+    * store manager home
+    * store manager signup

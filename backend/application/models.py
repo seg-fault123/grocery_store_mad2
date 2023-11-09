@@ -30,7 +30,7 @@ class Category(db.Model):
     products=db.relationship('Product', backref='category')
     def make_json(self):
         response=dict(id=self.id, name=self.name, description=self.description)
-        products=[{'id': product.id, 'name': product.name} for product in self.products[::-1]]
+        products=[{'id': product.id, 'name': product.name, 'sm_id': product.sm_id} for product in self.products[::-1]]
         response['products']=products
         return response
 

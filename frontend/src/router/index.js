@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import Customer_Add_to_Cart from "../components/customer/customer_add_to_cart"
 import Customer_Buy_Now from "../components/customer/customer_buy_now"
 import Customer_Cart from "../components/customer/customer_cart"
@@ -10,6 +11,18 @@ import Customer_Search from "../components/customer/customer_search"
 import Customer_Signup from "../components/customer/customer_signup"
 import Page_Not_Found from "../components/page_not_found"
 import Order_Summary from "../components/customer/order_summary"
+
+import Store_Manager_Add_Category from "../components/store_manager/store_manager_add_category"
+import Store_Manager_Edit_Category from "../components/store_manager/store_manager_edit_category"
+import Store_Manager_Category from "../components/store_manager/store_manager_category"
+import Store_Manager_Categories from "../components/store_manager/store_manager_categories"
+import Store_Manager_Home from "../components/store_manager/store_manager_home"
+import Store_Manager_Login from "../components/store_manager/store_manager_login"
+import Store_Manager_Add_Product from "../components/store_manager/store_manager_add_product"
+import Store_Manager_Edit_Product from "../components/store_manager/store_manager_edit_product"
+import Store_Manager_Product from "../components/store_manager/store_manager_product"
+import Store_Manager_Products from "../components/store_manager/store_manager_products"
+import Store_Manager_Signup from "../components/store_manager/store_manager_signup"
 
 
 const routes=[
@@ -66,6 +79,60 @@ const routes=[
         path: "/customer_signup",
         component: Customer_Signup
     },
+
+
+    {
+        path: "/store_manager/add_category",
+        component: Store_Manager_Add_Category
+    },
+    {
+        path: "/store_manager/edit_category/:cat_id(\\d+)",
+        component: Store_Manager_Edit_Category,
+        props: true
+    },
+    {
+        path: "/store_manager/category/:cat_id(\\d+)",
+        component: Store_Manager_Category,
+        props: true
+    },
+    {
+        path: "/store_manager/categories",
+        component: Store_Manager_Categories
+    },
+
+    {
+        path: "/store_manager_home",
+        component: Store_Manager_Home
+    },
+
+    {
+        path: "/store_manager_login",
+        component: Store_Manager_Login
+    },
+    {
+        path: "/store_manager/add_product",
+        component: Store_Manager_Add_Product
+    },
+    {
+        path: "/store_manager/edit_product/:p_id(\\d+)",
+        component: Store_Manager_Edit_Product,
+        props: true
+    },
+    {
+        path: "/store_manager/product/:p_id(\\d+)",
+        component: Store_Manager_Product,
+        props: true
+    },
+    {
+        path: "/store_manager/products",
+        component: Store_Manager_Products
+    },
+    {
+        path: "/store_manager_signup",
+        component: Store_Manager_Signup
+    },
+
+
     {
         path: "/:pathMatch(.*)*",
         component: Page_Not_Found

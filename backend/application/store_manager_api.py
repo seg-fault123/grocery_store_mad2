@@ -37,7 +37,7 @@ class Store_Manager_Api(Resource):
         store_manager=Store_Manager.query.filter_by(user_name=user_name).first()
         store_manager.access_token=create_access_token(identity=store_manager)
         db.session.commit()
-        return {'msg': 'Account Created Successfully! You can now Login.'}, 200
+        return {'msg': 'Request Made Successfully! You can Login after the Admin approves.'}, 200
 
 
 
@@ -53,6 +53,60 @@ class Store_Manager_Category(Resource):
             return response, 404
         response=category.make_json()
         response['msg']="Successful"
+        return response, 200
+
+    @jwt_required()
+    def post(self, sm_id):
+        response, status, store_manager=validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        data=request.json
+        response, status, new_category=validate_category_add(sm_id, data)
+        if new_category is None:
+            return response, status
+        db.session.add(new_category)
+        db.session.commit()
+        return {'msg': 'Request Made Successfully!'}, 200
+
+    @jwt_required()
+    def put(self, sm_id, cat_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        data=request.json
+        response, status, edit_category=validate_category_edit(sm_id, cat_id, data)
+        if edit_category is None:
+            return response, status
+        db.session.add(edit_category)
+        db.session.commit()
+        return {'msg': 'Request Made Successfully!'}, 200
+
+    @jwt_required()
+    def delete(self, sm_id, cat_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        data = request.json
+        response, status, delete_category=validate_category_delete(sm_id, cat_id, data)
+        if delete_category is None:
+            return response, status
+        db.session.add(delete_category)
+        db.session.commit()
+        return {'msg': 'Request Made Successfully!'}, 200
+
+
+
+class Store_Manager_Categories(Resource):
+    #this can be used to get categories for both home page and categories page
+    @jwt_required()
+    def get(self, sm_id):
+        response, status, store_manager=validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        categories=Category.query.all()
+        categories=[dict(id=category.id, name=category.name) for category in categories]
+        response['msg']='Successful'
+        response['categories']=categories
         return response, 200
 
 
@@ -86,6 +140,10 @@ class Store_Manager_Product(Resource):
         if product is None:
             response['msg'] = 'Product Not Found!'
             return response, 404
+        if 'product/' in request.url:
+            if product.sm_id!=sm_id:
+                response['msg'] = 'Product Not Found!'
+                return response, 404
         response = product.make_json()
         response['msg'] = 'Successful'
         return response, 200
@@ -103,6 +161,49 @@ class Store_Manager_Product(Resource):
         db.session.commit()
         return {'msg': 'Product Created Successfully!'}, 200
 
+    @jwt_required()
+    def put(self, sm_id, p_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        data = request.json
+        response, status, product = validate_product_edit(sm_id, p_id, data)
+        if product is None:
+            return response, status
+        db.session.commit()
+        return {'msg': "Product Updated Successfully!"}, 200
+
+    @jwt_required()
+    def delete(self, sm_id, p_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        product=Product.query.get(p_id)
+        if (product is None) or (product.sm_id!=sm_id):
+            return {'msg': 'Product does not exist!'}, 404
+        db.session.delete(product)
+        db.session.commit()
+        return {'msg': 'Product deleted Successfully!'}, 200
+
+
+
+
+
+class Store_Manager_Products(Resource):
+    # to be used for product page
+    # home page products will be included in the categories
+    @jwt_required()
+    def get(self, sm_id):
+        response, status, store_manager=validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        products=Product.query.filter_by(sm_id=sm_id).all()
+        products=[dict(id=product.id, name=product.name) for product in products]
+        response['msg']='Successful'
+        response['products']=products
+        return response, 200
+
+
 
 
 def validate_store_manager(requested_id, requester_jwt):
@@ -119,18 +220,20 @@ def validate_store_manager(requested_id, requester_jwt):
         return {'msg': 'Unauthorized Access'}, 401, None
     return {}, 200, store_manager
 
+
+
 def validate_product_add(sm_id, data):
-    name = data.get('name').title()
+    name = data.get('name')
     description = data.get('description')
     price = data.get('price')
     unit_measure = data.get('unit_measure')
     stock = data.get('stock')
-    category_id = data.get('category_id')
+    category_name = data.get('category_name')
     mfg_date = data.get('mfg_date')
     exp_date = data.get('exp_date')
-    data_sm_id = data.get('sm_id')
     if (name is None) or (name == ''):
         return {'msg': 'Name cannot be empty!'}, 406, None
+    name=name.title()
     name_already=Product.query.filter_by(name=name).first()
     if name_already is not None:
         return {'msg': 'Product with same name already exits!'}, 406, None
@@ -154,16 +257,11 @@ def validate_product_add(sm_id, data):
         return {'msg': 'Stock has to be numeric!'}, 406, None
     if stock < 0:
         return {'msg': 'Stock cannot be negative!'}, 406, None
-    if (category_id is None) or (category_id == ''):
+    if (category_name is None) or (category_name == ''):
         return {'msg': 'Category cannot be empty!'}, 406, None
-    try:
-        category_id=int(category_id)
-    except:
-        return {'msg': 'Category ID has to be numeric!'}, 406, None
-    if Category.query.get(category_id) is None:
-        return {'msg': 'Invalid Category ID!'}, 406, None
-    if (data_sm_id is None) or (data_sm_id == '') or data_sm_id != sm_id:
-        return {'msg': 'Store Manager ID not valid!'}, 406, None
+    category=Category.query.filter_by(name=category_name).first()
+    if category is None:
+        return {'msg': 'Invalid Category Name!'}, 406, None
     if (mfg_date is not None) and (mfg_date != ''):
         try:
             mfg_date = to_date(mfg_date)
@@ -174,13 +272,124 @@ def validate_product_add(sm_id, data):
         mfg_date = None
         exp_date = None
     product = Product(name=name, description=description, price=price, unit_measure=unit_measure,
-                      stock=stock, category_id=category_id, mfg_date=mfg_date, exp_date=exp_date,
+                      stock=stock, category_id=category.id, mfg_date=mfg_date, exp_date=exp_date,
                       sm_id=sm_id)
     return {}, 200, product
 
+def validate_product_edit(sm_id, p_id, data):
+    product=Product.query.get(p_id)
+    if (product is None) or (product.sm_id!=sm_id):
+        return {'msg': 'Product does not exist!'}, 404, None
+    name=data.get('name')
+    description = data.get('description')
+    price = data.get('price')
+    unit_measure = data.get('unit_measure')
+    stock = data.get('stock')
+    category_name = data.get('category_name')
+    mfg_date = data.get('mfg_date')
+    exp_date = data.get('exp_date')
+    if (name is None) or (name == ''):
+        return {'msg': 'Name cannot be empty!'}, 406, None
+    name = name.title()
+    name_already = Product.query.filter(Product.name == name, Product.id != p_id).first()
+    if name_already is not None:
+        return {'msg': 'Product with the same new name already exits!'}, 406, None
+    if (description is None) or (description == ''):
+        return {'msg': 'Description cannot be empty!'}, 406, None
+    if (price is None) or (price == ''):
+        return {'msg': 'Price cannot be Empty'}, 406, None
+    try:
+        price=int(price)
+    except:
+        return {'msg': "Price has to be numeric!"}, 406, None
+    if price <= 0:
+        return {'msg': 'Price cannot be less than or equal to 0!'}, 406, None
+    if (unit_measure is None) or (unit_measure == ''):
+        return {'msg': 'Unit Measure cannot be empty!'}, 406, None
+    if (stock is None) or (stock == ''):
+        return {'msg': "Stock cannot be empty!"}, 406, None
+    try:
+        stock=int(stock)
+    except:
+        return {'msg': 'Stock has to be numeric!'}, 406, None
+    if stock < 0:
+        return {'msg': 'Stock cannot be negative!'}, 406, None
+    if (category_name is None) or (category_name == ''):
+        return {'msg': 'Category cannot be empty!'}, 406, None
+    category=Category.query.filter_by(name=category_name).first()
+    if category is None:
+        return {'msg': 'Invalid Category Name!'}, 406, None
+    if (mfg_date is not None) and (mfg_date != ''):
+        try:
+            mfg_date = to_date(mfg_date)
+            exp_date = to_date(exp_date)
+        except:
+            return {'msg': "Date not in correct format! Format should be 'yyyy-mm-dd'"}, 406, None
+    else:
+        mfg_date = None
+        exp_date = None
+    product.name=name
+    product.description=description
+    product.price=price
+    product.unit_measure=unit_measure
+    product.stock=stock
+    product.mfg_date=mfg_date
+    product.exp_date=exp_date
+    product.category_id=category.id
+    return {}, 200, product
+
+
+def validate_category_add(sm_id, data):
+    name = data.get('name')
+    description = data.get('description')
+    reason= data.get('reason')
+    if (name is None) or (name==''):
+        return {'msg': 'Name cannot be empty!'}, 406, None
+    name=name.title()
+    name_already=Category.query.filter_by(name=name).first()
+    if name_already is not None:
+        return {'msg': 'Category with same name already exits!'}, 406, None
+    if (description is None) or (description==''):
+        return {'msg': 'Description cannot be empty!'}, 406, None
+    if (reason is None) or (reason==''):
+        return {'msg': 'Reason cannot be empty!'}, 406, None
+    new_category=New_Category_Request(name=name, description=description, reason=reason, sm_id=sm_id)
+    return {}, 200, new_category
+
+def validate_category_edit(sm_id, cat_id, data):
+    if Category.query.get(cat_id) is None:
+        return {'msg': 'Category does not exist!'}, 404, None
+    name = data.get('name')
+    description = data.get('description')
+    reason = data.get('reason')
+    if (name is None) or (name==''):
+        return {'msg': 'Name cannot be empty!'}, 406, None
+    name=name.title()
+    name_already=Category.query.filter(Category.name==name, Category.id!=cat_id).first()
+    if name_already is not None:
+        return {'msg': 'Category with the same new name already exits!'}, 406, None
+    if (description is None) or (description==''):
+        return {'msg': 'Description cannot be empty!'}, 406, None
+    if (reason is None) or (reason==''):
+        return {'msg': 'Reason cannot be empty!'}, 406, None
+    edit_category=Edit_Category_Request(name=name, description=description, reason=reason, sm_id=sm_id, category_id=cat_id)
+    return {}, 200, edit_category
+
+def validate_category_delete(sm_id, cat_id, data):
+    if Category.query.get(cat_id) is None:
+        return {'msg': 'Category does not exist!'}, 404, None
+    reason = data.get('reason')
+    if (reason is None) or (reason==''):
+        return {'msg': 'Reason cannot be empty!'}, 406, None
+    delete_category=Delete_Category_Request(reason=reason, sm_id=sm_id, category_id=cat_id)
+    return {}, 200, delete_category
+
 
 api.add_resource(Store_Manager_Api, '/api/store_manager')
-api.add_resource(Store_Manager_Category, '/api/store_manager/<int:sm_id>/category/<int:cat_id>')
+api.add_resource(Store_Manager_Category, '/api/store_manager/<int:sm_id>/category',
+                 '/api/store_manager/<int:sm_id>/category/<int:cat_id>')
+api.add_resource(Store_Manager_Categories, '/api/store_manager/<int:sm_id>/categories')
 api.add_resource(Store_Manager_Login, '/api/store_manager_login')
 api.add_resource(Store_Manager_Product, '/api/store_manager/<int:sm_id>/product/<int:p_id>',
-                 '/api/store_manager/<int:sm_id>/product')
+                 '/api/store_manager/<int:sm_id>/product', '/api/store_manager/<int:sm_id>/product_home/<int:p_id>')
+api.add_resource(Store_Manager_Products, '/api/store_manager/<int:sm_id>/products')
