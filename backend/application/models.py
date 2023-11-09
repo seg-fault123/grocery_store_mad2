@@ -58,6 +58,7 @@ class Delete_Category_Request(db.Model):
     category_id=db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     sm_id=db.Column(db.Integer, db.ForeignKey('store_manager.id'), nullable=False)
     category=db.relationship('Category')
+    store_manager=db.relationship('Store_Manager')
 
 class Edit_Category_Request(db.Model):
     __tablename__ = 'edit_category_request'
@@ -68,6 +69,7 @@ class Edit_Category_Request(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     sm_id = db.Column(db.Integer, db.ForeignKey('store_manager.id'), nullable=False)
     category=db.relationship('Category')
+    store_manager=db.relationship('Store_Manager')
 
 class New_Category_Request(db.Model):
     __tablename__ = 'new_category_request'
@@ -76,6 +78,7 @@ class New_Category_Request(db.Model):
     description = db.Column(db.String, nullable=False)
     reason = db.Column(db.String, nullable=False)
     sm_id = db.Column(db.Integer, db.ForeignKey('store_manager.id'), nullable=False)
+    store_manager=db.relationship('Store_Manager')
 
 class Order(db.Model):
     __tablename__='order'

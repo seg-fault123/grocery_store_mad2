@@ -45,6 +45,19 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * admin login
     * get category
     * post category
+    * edit category
+    * delete category
+    * get categories
+    * get delete category requests
+    * remove delete category requests
+    * get edit category requests
+    * remove edit category requests
+    * get new category requests
+    * remove new category requests
+    * get product
+    * get new store manager requests
+    * accept new store manager request
+    * decline new store manager request
 * ### Store Manager
     * store manager login
     * new store manager
