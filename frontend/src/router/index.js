@@ -1,5 +1,17 @@
 import { createRouter, createWebHistory } from "vue-router";
 
+import Admin_Add_Category from "../components/admin/admin_add_category"
+import Admin_Edit_Category from "../components/admin/admin_edit_category"
+import Admin_Category from "../components/admin/admin_category"
+import Admin_Categories from "../components/admin/admin_categories"
+import Admin_Category_Requests from "../components/admin/admin_category_requests"
+import Admin_Delete_Category_Requests from "../components/admin/admin_delete_category_requests"
+import Admin_Edit_Category_Requests from "../components/admin/admin_edit_category_requests"
+import Admin_New_Category_Requests from "../components/admin/admin_new_category_requests"
+import Admin_New_Store_Managers from "../components/admin/admin_new_store_managers"
+import Admin_Home from "../components/admin/admin_home"
+import Admin_Login from "../components/admin/admin_login"
+
 import Customer_Add_to_Cart from "../components/customer/customer_add_to_cart"
 import Customer_Buy_Now from "../components/customer/customer_buy_now"
 import Customer_Cart from "../components/customer/customer_cart"
@@ -26,6 +38,54 @@ import Store_Manager_Signup from "../components/store_manager/store_manager_sign
 
 
 const routes=[
+    {
+        path: '/admin/add_category',
+        component: Admin_Add_Category,
+    },
+    {
+        path: '/admin/edit_category/:cat_id(\\d+)',
+        component: Admin_Edit_Category,
+        props: true
+    },
+    {
+        path: "/admin/category/:cat_id(\\d+)",
+        component: Admin_Category,
+        props: true
+    },
+    {
+        path: "/admin/categories",
+        component: Admin_Categories
+    },
+    {
+        path: '/admin/category_requests',
+        component: Admin_Category_Requests
+    },
+    {
+        path: '/admin/delete_category_requests',
+        component: Admin_Delete_Category_Requests
+    },
+    {
+        path: '/admin/edit_category_requests',
+        component: Admin_Edit_Category_Requests
+    },
+    {
+        path: '/admin/new_category_requests',
+        component: Admin_New_Category_Requests
+    },
+    {
+        path: '/admin/new_store_managers',
+        component: Admin_New_Store_Managers
+    },
+    {
+        path: "/admin_home",
+        component: Admin_Home
+    },
+    {
+        path: "/admin_login",
+        component: Admin_Login
+    },
+    
+    
     {
         path: "/",
         redirect: {

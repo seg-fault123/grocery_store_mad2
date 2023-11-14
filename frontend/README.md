@@ -73,6 +73,18 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * get categories
     
 ## Frontend Implemented
+* ### Admin
+    * admin login
+    * admin home
+    * get categories
+    * add category
+    * edit category
+    * delete category
+    * accept/decline new store managers
+    * accept/decline new category requests
+    * accept/decline edit category requests
+    * accept/decline delete category requests
+
 * ### Customer
     * buy now
     * view cart
