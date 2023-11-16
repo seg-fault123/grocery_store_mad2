@@ -71,6 +71,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * edit category request
     * delete category request
     * get categories
+    * generate report
+    * download report
     
 ## Frontend Implemented
 * ### Admin
@@ -112,3 +114,4 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * get products
     * store manager home
     * store manager signup
+    * download report

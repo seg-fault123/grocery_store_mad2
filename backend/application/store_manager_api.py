@@ -1,7 +1,9 @@
-from flask import request
+from flask import request, send_file
 from flask_restful import Resource
+from celery.result import AsyncResult
 from passlib.hash import pbkdf2_sha256 as hash_password
 from .api import *
+from .tasks import create_store_manager_report
 from flask_jwt_extended import create_access_token, current_user, jwt_required, get_jwt, decode_token
 
 class Store_Manager_Api(Resource):
@@ -204,7 +206,34 @@ class Store_Manager_Products(Resource):
         return response, 200
 
 
+class Store_Manager_Create_Report(Resource):
+    @jwt_required()
+    def get(self, sm_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        if len(store_manager.products)==0:
+            return {'msg': 'Store Manager does not have any Products! Report cannot be generated!'}, 406
+        task=create_store_manager_report.delay(sm_id)
+        response['msg']='Successful'
+        response['task_id']=task.id
+        return response, 200
 
+
+class Store_Manager_Download_Report(Resource):
+    @jwt_required()
+    def get(self, sm_id, task_id):
+        response, status, store_manager = validate_store_manager(sm_id, get_jwt())
+        if store_manager is None:
+            return response, status
+        task=AsyncResult(task_id)
+        if task.ready():
+            filename=task.result
+            send=send_file(filename, mimetype='text/csv', as_attachment=True)
+            send.headers['Content-Disposition'] = f'attachment; filename={filename}'
+            return send
+        else:
+            return {'msg': 'Task Pending'}, 404
 
 def validate_store_manager(requested_id, requester_jwt):
     identity = requester_jwt['sub']
@@ -393,3 +422,5 @@ api.add_resource(Store_Manager_Login, '/api/store_manager_login')
 api.add_resource(Store_Manager_Product, '/api/store_manager/<int:sm_id>/product/<int:p_id>',
                  '/api/store_manager/<int:sm_id>/product', '/api/store_manager/<int:sm_id>/product_home/<int:p_id>')
 api.add_resource(Store_Manager_Products, '/api/store_manager/<int:sm_id>/products')
+api.add_resource(Store_Manager_Create_Report, '/api/store_manager/<int:sm_id>/create_report')
+api.add_resource(Store_Manager_Download_Report, '/api/store_manager/<int:sm_id>/download_report/<task_id>')

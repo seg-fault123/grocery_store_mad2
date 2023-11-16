@@ -6,9 +6,13 @@
             <div class="card-body">
                 <div class="row">
                     <h3 class="card-title col">Your Products</h3>
-                    <button class="btn btn-outline-success btn-lg col-4"
+                    <button class="btn btn-outline-success btn-lg col" id="add"
                         @click="$router.push(`/store_manager/add_product`)">Add Product</button>
-                    <div class="col-1"></div>
+                    <button v-if="empty===false" class="btn btn-outline-dark btn-lg col"
+                        @click="download_report()">Download Report</button>
+                    <div class="col-2">
+                        <p v-if="waiting" class="badge bg-warning" style="padding=20px">Please Wait!</p>
+                    </div>
                 </div>
                 <div v-if="empty" class="alert alert-secondary" role="alert">
                     You do not have any products!
@@ -46,7 +50,8 @@
         data(){
             return {
                 unauthorized: false,
-                products: []
+                products: [],
+                waiting: false
             }
         },
         computed: {
@@ -57,6 +62,42 @@
             }
         },
         methods: {
+            async download_report(){
+                this.waiting=true
+                let sm_id=this.$store.state.id
+                let access_token=this.$store.state.access_token
+                let url1=`http://127.0.0.1:5000/api/store_manager/${sm_id}/create_report`
+                let resp1=await fetch(url1, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${access_token}`
+                    }
+                })
+                let data1=await resp1.json()
+                let task_id=data1['task_id']
+                let url2=`http://127.0.0.1:5000/api/store_manager/${sm_id}/download_report/${task_id}`
+                let intv=setInterval(async ()=>{
+                    let resp2=await fetch(url2, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${access_token}`,
+                        }
+                    })
+                    if (resp2.status===200)
+                    {
+                        clearInterval(intv)
+                        let blob=await resp2.blob()
+                        let filename=`report${sm_id}.csv`
+                        const link=document.createElement('a')
+                        link.href = window.URL.createObjectURL(blob)
+                        link.download = filename
+                        link.click()
+                        window.URL.revokeObjectURL(link.href)
+                        this.waiting=false
+                    }
+                }, 1000)
+            },
             logout(){
                 this.$store.commit('reset_data')
                 this.$router.push('/store_manager_login')
@@ -89,3 +130,9 @@
         
     }
 </script>
+
+<style scoped>
+    #add {
+        margin-right: 10px;
+    }
+</style>
