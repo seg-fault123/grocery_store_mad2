@@ -355,7 +355,7 @@ def search_by_cname():
         tag=None
     tag=f'%%{tag}%%'
     results=Category.query.filter(Category.name.like(tag)).all()
-    results=[category.id for category in results]
+    results=[category.id for category in results if len(category.products)>0]
     return results
 
 def search_by_price(tag):

@@ -95,6 +95,7 @@
                         link.click()
                         window.URL.revokeObjectURL(link.href)
                         this.waiting=false
+                        alert("Report Downloaded Successfully!")
                     }
                 }, 1000)
             },

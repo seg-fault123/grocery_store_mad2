@@ -3,4 +3,5 @@ backendstore.db
 /backend/application/__pycache__
 /backend/__pycache__
 dump.rdb
+/backend/celerybeat-schedule
 /backend/report.csv

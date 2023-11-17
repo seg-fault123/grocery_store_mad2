@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Report</title>
+</head>
+<body>
+    <h3>Hey {{ customer_name }}!</h3>
+    {% if total_orders!=0 %}
+    <table style="margin: 20px;">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                </tr>
+        </thead>
+        <tbody>
+        {% for order in orders %}
+            {% for order_product in order.order_products %}
+                {% set total=order_product.product.price|float * order_product.quantity|float %}
+                    <tr>
+                        <td>{{ order.id }}</td>
+                        <td>{{ order.date }}</td>
+                        <td>{{ order_product.product.id }}</td>
+                        <td>{{ order_product.product.name }}</td>
+                        <td>{{ order_product.product.price }}</td>
+                        <td>{{ order_product.quantity }}</td>
+                        <td>{{ total }}</td>
+                    </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    <p><b>Total Orders : </b>{{ total_orders }}</p>
+    <p><b>Total Expenditure : </b>{{ grand_total }}</p>
+</body>
+</html>

@@ -41,6 +41,8 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
     * order summary
     * new order
     * search
+    * mail monthly report
+    * mail daily reminder
 * ### Admin
     * admin login
     * get category

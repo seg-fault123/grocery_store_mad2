@@ -3,7 +3,9 @@ import os
 from application.database import db
 from flask_cors import CORS
 from application.worker import celery_init_app
+from celery.schedules import crontab
 from flask_excel import init_excel
+from application.tasks import send_daily_reminder, send_monthly_report
 
 app=Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///{0}'.format(os.path.join(os.getcwd(), 'store.db'))
@@ -28,6 +30,15 @@ with app.app_context():
     from application.store_manager_api import *
     from sqlalchemy import event
     event.listen(db.engine, 'connect', _fk_pragma_on_connect)
+
+
+@celery_app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(crontab(hour=17, minute=0),
+                             send_daily_reminder.s())
+    sender.add_periodic_task(crontab(day_of_month=1),
+                             send_monthly_report.s())
+
 
 if __name__=='__main__':
     # print('sqlite:///{0}'.format(os.path.join(os.getcwd(), 'store.db')))
