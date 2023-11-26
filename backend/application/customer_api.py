@@ -94,8 +94,7 @@ class Customer_Cart(Resource):
         response, status, customer=validate_customer(c_id, get_jwt())
         if customer is None:
             return response, status
-        cart=[(cart_product.product, cart_product.quantity) for cart_product in customer.cart]
-        cart=[dict(id=product.id, name=product.name, price=product.price, quantity=quantity) for product, quantity in cart]
+        cart=get_customer_cart(c_id)
         response['msg']='Successful'
         response['cart']=cart
         return response, 200
@@ -129,6 +128,7 @@ class Customer_Cart(Resource):
             db.session.add(Cart_Product(customer_id=c_id, product_id=p_id, quantity=quantity))
         db.session.commit()
         response['msg'] = "Successfully added to Cart"
+        cache.delete_memoized(get_customer_cart, c_id)
         return response, 200
 
     @jwt_required()
@@ -160,6 +160,7 @@ class Customer_Cart(Resource):
         cart_product.quantity=quantity
         db.session.commit()
         response['msg']="Successfully Updated"
+        cache.delete_memoized(get_customer_cart, c_id)
         return response, 200
 
     @jwt_required()
@@ -174,6 +175,7 @@ class Customer_Cart(Resource):
         db.session.delete(cart_product)
         db.session.commit()
         response['msg']='Successfully Deleted'
+        cache.delete_memoized(get_customer_cart, c_id)
         return response, 200
 
 
@@ -200,7 +202,7 @@ class Customer_Category(Resource):
         response, status, customer=validate_customer(c_id, get_jwt())
         if customer is None:
             return response, status
-        category=Category.query.get(cat_id)
+        category=get_category_by_id(cat_id)
         if category is None:
             response['msg']='Category Not Found!'
             return response, 404
@@ -215,7 +217,7 @@ class Customer_Home(Resource):
         response, status, customer=validate_customer(c_id, get_jwt())
         if customer is None:
             return response, status
-        categories=Category.query.all()
+        categories=get_all_categories()
         response['msg']="Successful"
         response['categories']=[category.id for category in categories]
         return response, 200
@@ -261,7 +263,7 @@ class Customer_Orders(Resource):
         response, status, customer=validate_customer(c_id, get_jwt())
         if customer is None:
             return response, status
-        orders=[dict(id=order.id, date=order.date.__str__()) for order in customer.orders[::-1]]
+        orders=get_customer_orders(c_id)
         response['msg']='Successful'
         response['orders']=orders
         return response, 200
@@ -274,7 +276,7 @@ class Customer_Order(Resource):
         response, status, customer=validate_customer(c_id, get_jwt())
         if customer is None:
             return response, status
-        order=Order.query.get(o_id)
+        order=get_order_by_id(o_id)
         if (order is None) or (order.id!=o_id) or (order.customer_id!=c_id):
             response['msg']='Order not Found'
             return response, 404
@@ -303,6 +305,7 @@ class Customer_Order(Resource):
         db.session.commit()
         response['msg'] = 'Successfully Placed'
         response['order_id'] = order.id
+        cache.delete_memoized(get_customer_orders, c_id)
         return response, 200
 
 
@@ -322,16 +325,16 @@ class Customer_Search(Resource):
             tag=request.args.get('price')
             try:
                 tag=int(tag)
+                response['results'] = search_by_price(tag)
             except:
                 response['results']=[]
-            response['results']=search_by_price(tag)
         elif option=='mfg_date':
             tag=request.args.get('mfg_date')
             try:
                 mfg_date=to_date(tag)
+                response['results'] = search_by_mfg_date(mfg_date)
             except:
                 response['results'] = []
-            response['results'] = search_by_mfg_date(mfg_date)
         else:
             response['msg']='Option is Not Valid!'
             return response, 406
@@ -370,6 +373,7 @@ def search_by_mfg_date(tag):
     return results
 
 
+@cache.memoize(timeout=300)
 def validate_customer(requested_id, requester_jwt):
     identity=requester_jwt['sub']
     if identity['role_name']!='customer':

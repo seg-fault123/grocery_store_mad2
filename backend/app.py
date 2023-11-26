@@ -12,6 +12,10 @@ app=Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///' + os.getcwd() + r'/store.db'
 app.config['JWT_SECRET_KEY']='EvI1xOU73MuhiGNd4Qr-ZA'
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=False
+app.config['CACHE_TYPE']='RedisCache'
+app.config['CACHE_REDIS_HOST']='localhost'
+app.config['CACHE_REDIS_PORT']=6379
+
 
 db.init_app(app)
 cors=CORS(app, origins='http://localhost:8080')

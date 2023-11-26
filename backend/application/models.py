@@ -20,14 +20,14 @@ class Cart_Product(db.Model):
     customer_id=db.Column(db.Integer, db.ForeignKey('customer.id'), primary_key=True)
     product_id=db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     quantity=db.Column(db.Integer, nullable=False)
-    customer=db.relationship('Customer', backref='cart')
-    product=db.relationship('Product')
+    customer=db.relationship('Customer', back_populates='cart', lazy='subquery')
+    product=db.relationship('Product', back_populates='carts', lazy='subquery')
 class Category(db.Model):
     __tablename__='category'
     id=db.Column(db.Integer, autoincrement=True, primary_key=True)
     name=db.Column(db.String, nullable=False, unique=True)
     description=db.Column(db.String, nullable=False)
-    products=db.relationship('Product', backref='category')
+    products=db.relationship('Product', back_populates='category', lazy='subquery')
     def make_json(self):
         response=dict(id=self.id, name=self.name, description=self.description)
         products=[{'id': product.id, 'name': product.name, 'sm_id': product.sm_id} for product in self.products[::-1]]
@@ -45,6 +45,8 @@ class Customer(db.Model):
     access_token=db.Column(db.String, unique=True)
     role_id=db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     last_active=db.Column(db.Date)
+    orders=db.relationship('Order', back_populates='customer', lazy='subquery')
+    cart=db.relationship('Cart_Product', back_populates='customer', lazy='subquery')
     def make_json(self):
         response=dict(id=self.id, first_name=self.first_name, last_name=self.last_name,
                       email_id=self.email_id, user_name=self.user_name, access_token=self.access_token,
@@ -85,7 +87,8 @@ class Order(db.Model):
     id=db.Column(db.Integer, autoincrement=True, primary_key=True)
     date=db.Column(db.Date, nullable=False)
     customer_id=db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
-    customer=db.relationship('Customer', backref='orders')
+    customer=db.relationship('Customer', back_populates='orders', lazy='subquery')
+    order_products=db.relationship('Order_Product', back_populates='order', lazy='subquery')
     def make_json(self):
         products=[(order_product.product, order_product.quantity) for order_product in self.order_products]
         products=[dict(id=product.id, name=product.name, price=product.price, quantity=quantity) for product, quantity in products]
@@ -98,8 +101,8 @@ class Order_Product(db.Model):
     order_id=db.Column(db.Integer, db.ForeignKey('order.id'), primary_key=True)
     product_id=db.Column(db.Integer, db.ForeignKey('product.id'), primary_key=True)
     quantity=db.Column(db.Integer, nullable=False)
-    product=db.relationship('Product')
-    order=db.relationship('Order', backref='order_products')
+    product=db.relationship('Product', back_populates='orders', lazy='subquery')
+    order=db.relationship('Order', back_populates='order_products', lazy='subquery')
 
 class Product(db.Model):
     __tablename__='product'
@@ -114,7 +117,11 @@ class Product(db.Model):
     sm_id=db.Column(db.Integer, db.ForeignKey('store_manager.id'), nullable=False)
     mfg_date=db.Column(db.Date)
     exp_date=db.Column(db.Date)
-    store_manager=db.relationship('Store_Manager', backref='products')
+    store_manager=db.relationship('Store_Manager', back_populates='products', lazy='subquery')
+    carts=db.relationship('Cart_Product', back_populates='product', lazy='subquery')
+    # category=db.relationship('Category', back_populates='products', lazy='subquery')
+    category=db.relationship('Category')
+    orders=db.relationship('Order_Product', back_populates='product', lazy='subquery')
     def make_json(self):
         mfg_date=None
         exp_date=None
@@ -148,6 +155,7 @@ class Store_Manager(db.Model):
     access_token = db.Column(db.String, unique=True)
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     approved=db.Column(db.Integer, nullable=False, default=0)
+    products=db.relationship('Product', back_populates='store_manager', lazy='subquery')
 
     def make_json(self):
         response = dict(id=self.id, first_name=self.first_name, last_name=self.last_name,

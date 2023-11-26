@@ -49,7 +49,7 @@ class Store_Manager_Category(Resource):
         response, status, store_manager=validate_store_manager(sm_id, get_jwt())
         if store_manager is None:
             return response, status
-        category=Category.query.get(cat_id)
+        category=get_category_by_id(cat_id)
         if category is None:
             response['msg']='Category Not Found!'
             return response, 404
@@ -105,7 +105,7 @@ class Store_Manager_Categories(Resource):
         response, status, store_manager=validate_store_manager(sm_id, get_jwt())
         if store_manager is None:
             return response, status
-        categories=Category.query.all()
+        categories=get_all_categories()
         categories=[dict(id=category.id, name=category.name) for category in categories]
         response['msg']='Successful'
         response['categories']=categories
@@ -161,6 +161,7 @@ class Store_Manager_Product(Resource):
             return response, status
         db.session.add(product)
         db.session.commit()
+        cache.delete_memoized(get_category_by_id, product.category_id)
         return {'msg': 'Product Created Successfully!'}, 200
 
     @jwt_required()
@@ -184,6 +185,7 @@ class Store_Manager_Product(Resource):
         if (product is None) or (product.sm_id!=sm_id):
             return {'msg': 'Product does not exist!'}, 404
         db.session.delete(product)
+        cache.delete_memoized(get_category_by_id, product.category_id)
         db.session.commit()
         return {'msg': 'Product deleted Successfully!'}, 200
 
@@ -235,6 +237,7 @@ class Store_Manager_Download_Report(Resource):
         else:
             return {'msg': 'Task Pending'}, 404
 
+@cache.memoize(timeout=300)
 def validate_store_manager(requested_id, requester_jwt):
     identity = requester_jwt['sub']
     if identity['role_name'] != 'store_manager':
@@ -386,7 +389,7 @@ def validate_category_add(sm_id, data):
     return {}, 200, new_category
 
 def validate_category_edit(sm_id, cat_id, data):
-    if Category.query.get(cat_id) is None:
+    if get_category_by_id(cat_id) is None:
         return {'msg': 'Category does not exist!'}, 404, None
     name = data.get('name')
     description = data.get('description')
@@ -405,7 +408,7 @@ def validate_category_edit(sm_id, cat_id, data):
     return {}, 200, edit_category
 
 def validate_category_delete(sm_id, cat_id, data):
-    if Category.query.get(cat_id) is None:
+    if get_category_by_id(cat_id) is None:
         return {'msg': 'Category does not exist!'}, 404, None
     reason = data.get('reason')
     if (reason is None) or (reason==''):

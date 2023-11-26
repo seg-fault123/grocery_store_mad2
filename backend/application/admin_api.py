@@ -10,7 +10,7 @@ class Admin_Category(Resource):
         response, status, admin=validate_admin(a_id, get_jwt())
         if admin is None:
             return response, status
-        category=Category.query.get(cat_id)
+        category=get_category_by_id(cat_id)
         if category is None:
             response['msg']="Category Not Found!"
             return response, 404
@@ -37,6 +37,7 @@ class Admin_Category(Resource):
         category=Category(name=name, description=description)
         db.session.add(category)
         db.session.commit()
+        cache.delete('all_categories')
         return {'msg': 'Category added successfully!'}, 200
 
     @jwt_required()
@@ -61,6 +62,8 @@ class Admin_Category(Resource):
         category.name=name
         category.description=description
         db.session.commit()
+        cache.delete('all_categories')
+        cache.delete_memoized(get_category_by_id, cat_id)
         return {'msg': 'Category Updated Successfully!'}, 200
 
     @jwt_required()
@@ -73,6 +76,8 @@ class Admin_Category(Resource):
             return {'msg': 'Category does not exist!'}, 404
         db.session.delete(category)
         db.session.commit()
+        cache.delete('all_categories')
+        cache.delete_memoized(get_category_by_id, cat_id)
         return {'msg': 'Category Deleted Successfully!'}, 200
 
 
@@ -83,7 +88,7 @@ class Admin_Categories(Resource):
         response, status, admin = validate_admin(a_id, get_jwt())
         if admin is None:
             return response, status
-        categories = Category.query.all()
+        categories = get_all_categories()
         categories = [dict(id=category.id, name=category.name) for category in categories]
         response['msg'] = 'Successful'
         response['categories'] = categories
@@ -251,6 +256,7 @@ class Admin_New_Store_Manager(Resource):
         return {'msg': 'Request Declined Successfully!'}, 200
 
 
+@cache.memoize(timeout=300)
 def validate_admin(requested_id, requester_jwt):
     identity=requester_jwt['sub']
     if identity['role_name']!='admin':
