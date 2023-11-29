@@ -72,7 +72,7 @@
     export default {
         name: "Store_Manager_Category",
         props: {
-            cat_id: Number
+            cat_id: String
         },
         components: {
             Store_Manager_Product,

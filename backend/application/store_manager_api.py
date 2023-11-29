@@ -367,7 +367,9 @@ def validate_product_edit(sm_id, p_id, data):
     product.stock=stock
     product.mfg_date=mfg_date
     product.exp_date=exp_date
+    cache.delete_memoized(get_category_by_id, product.category_id)
     product.category_id=category.id
+    cache.delete_memoized(get_category_by_id, product.category_id)
     return {}, 200, product
 
 

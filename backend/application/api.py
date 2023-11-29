@@ -47,8 +47,8 @@ def get_category_by_id(cat_id):
 
 @cache.memoize(timeout=100)
 def get_customer_cart(c_id):
-    customer=Customer.query.get(c_id)
-    cart = [(cart_product.product, cart_product.quantity) for cart_product in customer.cart]
+    cart=Cart_Product.query.filter_by(customer_id=c_id).all()
+    cart = [(cart_product.product, cart_product.quantity) for cart_product in cart]
     cart = [dict(id=product.id, name=product.name, price=product.price, quantity=quantity) for product, quantity in
             cart]
     return cart

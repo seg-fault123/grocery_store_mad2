@@ -38,10 +38,12 @@ with app.app_context():
 
 @celery_app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(crontab(hour=17, minute=0),
-                             send_daily_reminder.s())
-    sender.add_periodic_task(crontab(day_of_month=1),
-                             send_monthly_report.s())
+    # sender.add_periodic_task(crontab(hour=17, minute=0),
+    #                          send_daily_reminder.s())
+    sender.add_periodic_task(100, send_daily_reminder.s())
+    # sender.add_periodic_task(crontab(day_of_month=1),
+    #                          send_monthly_report.s())
+    sender.add_periodic_task(200, send_monthly_report.s())
 
 
 if __name__=='__main__':

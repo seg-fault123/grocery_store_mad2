@@ -83,6 +83,7 @@ class Customer_Buy_Now(Resource):
         db.session.commit()
         response['msg']='Successfully Placed'
         response['order_id']=order.id
+        cache.delete_memoized(get_customer_orders, c_id)
         return response, 200
 
 
@@ -292,20 +293,21 @@ class Customer_Order(Resource):
         response, status, order=validate_order(customer)
         if order is None:
             return response, status
-        cart=customer.cart
+        cart=Cart_Product.query.filter_by(customer_id=c_id)
+        db.session.add(order)
+        db.session.commit()
+        order = Order.query.all()[-1]
+        for cart_product in cart:
+            db.session.add(Order_Product(order_id=order.id, product_id=cart_product.product_id, quantity=cart_product.quantity))
         for cart_product in cart:
             cart_product.product.stock-=cart_product.quantity
             cart_product.product.units_sold+=cart_product.quantity
             db.session.delete(cart_product)
-        db.session.add(order)
-        db.session.commit()
-        order=Order.query.all()[-1]
-        for cart_product in cart:
-            db.session.add(Order_Product(order_id=order.id, product_id=cart_product.product_id, quantity=cart_product.quantity))
         db.session.commit()
         response['msg'] = 'Successfully Placed'
         response['order_id'] = order.id
         cache.delete_memoized(get_customer_orders, c_id)
+        cache.delete_memoized(get_customer_cart, c_id)
         return response, 200
 
 
@@ -389,7 +391,7 @@ def validate_customer(requested_id, requester_jwt):
     return {}, 200, customer
 
 def validate_order(customer):
-    cart=customer.cart
+    cart=Cart_Product.query.filter_by(customer_id=customer.id).all()
     if len(cart)==0:
         return {'msg': "Cart is Empty, cannot place Order!"}, 406, None
     for cart_product in cart:
