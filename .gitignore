@@ -6,3 +6,5 @@ dump.rdb
 /backend/celerybeat-schedule
 /backend/report.csv
 /backend/store2.db
+/.idea/*
+/.vscode/*
