@@ -1,4 +1,4 @@
-# Modern Application Development 2 Projet
+# Modern Application Development 2 Project
 ## IIT Madras Online BS Degree in Data Science and Applications (Diploma Level)
 ## September 2023
 ### Grocery Store Application
@@ -15,16 +15,16 @@ This project showcases the seamless integration of multiple technologies to deli
 ### Project Structure
 The project is divided into two main directories:
 * `backend/` : This directory contains the code to run the backend tasks.
-    * `app.py` : The file that initializes the Flask Application for backend tasks.
+    * `app.py` : The file initializes the Flask Application for backend tasks.
     * `celeryconfig.py` : contains the configuration for initializing the celery instance
-    * `application/` : This directory contains the helper modeules that are required by the app.
-        * `admin_api.py` : Code for end points specific to the Admin in the app.
-        * `api.py` : code for initializing the JWTManager and api instance.
-        * `customer_api.py` : Code for end points specific to the Customer in the app.
-        * `database.py` : code for initializing the database instance for the app.
+    * `application/` : This directory contains the helper modules required by the app.
+        * `admin_api.py` : Code for endpoints specific to the Admin in the app.
+        * `api.py` : code for initializing the JWTManager and API instance.
+        * `customer_api.py` : Code for endpoints specific to the Customer in the app.
+        * `database.py` : code for initializing the app database instance.
         * `models.py` : ORMs for the database.
         * `my_mail.py`: code for sending the mails.
-        * `store_manager.py` : Code for end points specific to the Store Manager in the app.
+        * `store_manager.py` : Code for endpoints specific to the Store Manager in the app.
         * `tasks.py` : code for doing asynchronous tasks for celery.
         * `worker.py` : Initialize a celery worker
 
@@ -33,7 +33,7 @@ The project is divided into two main directories:
         * `admin/` : all vue components related to the Admin part of the frontend. 
         * `customer/` : all vue components related to the Customer part of the frontend. 
         * `store_manager/` : all vue components related to the Store Manager part of the frontend. 
-    * `src/router/index.js` : This file has all the routing configurations that govern the url structure of the application.
+    * `src/router/index.js` : This file has all the routing configurations that govern the URL structure of the application.
     * `App.vue` : code for initializing the Vue app.
     * `main.js` : code for linking the vue app, vue store manager, and vue router. 
 
